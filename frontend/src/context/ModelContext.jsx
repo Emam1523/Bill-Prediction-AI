@@ -6,31 +6,26 @@ export const useModel = () => useContext(Ctx);
 
 export function ModelProvider({ children }) {
   const [k, setKRaw]           = useState(9);
-  const [splitInt, setSplitInt] = useState(90);         // 70-95 integer (displayed as 0.XX)
-  const [metrics, setMetrics]   = useState(null);       // { train,test,mae,rmse,mape,accuracy,k,split }
+  const [splitInt, setSplitInt] = useState(90);        
+  const [metrics, setMetrics]   = useState(null);       
   const [dashData, setDashData] = useState(null);
   const [billHistData, setBillHistData] = useState(null);
   const [dashLoaded, setDashLoaded]     = useState(false);
-  const [dashRefreshing, setDashRefreshing] = useState(false); // subtle refresh — old charts stay visible
+  const [dashRefreshing, setDashRefreshing] = useState(false); 
   const [howLoaded, setHowLoaded]           = useState(false);
 
   const timerRef     = useRef(null);
-  const dashSplitRef = useRef(null);   // split value that produced the current dashData
-  const dashKRef     = useRef(null);   // k value that produced the current dynamic charts
+  const dashSplitRef = useRef(null); 
+  const dashKRef     = useRef(null);   
 
-  /* Derived: split as 0.XX float */
   const split = splitInt / 100;
 
-  /* Ensure k is always odd */
   const setK = useCallback((v) => {
     let n = parseInt(v, 10);
     if (n % 2 === 0) n++;
     setKRaw(n);
   }, []);
 
-  /* Train the model — called on every k/split change.
-     • Split change  → full dashboard reset (k-comparison must also reload)
-     • k-only change → keep existing charts; soft-refresh dynamic parts only  */
   const trainModel = useCallback(() => {
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(async () => {
@@ -41,30 +36,25 @@ export function ModelProvider({ children }) {
         const splitChanged = dashSplitRef.current !== null &&
                              Math.round(dashSplitRef.current * 100) !== Math.round(split * 100);
         if (splitChanged || !dashLoaded) {
-          // Full reset — dashboard will re-fetch everything
+          // Full reset
           setDashLoaded(false);
           setHowLoaded(false);
           dashSplitRef.current = null;
           dashKRef.current     = null;
         }
-        // k-only change while dashboard already loaded → soft refresh triggered
-        // by the useEffect below (watches k when dashLoaded=true)
       } catch (e) {
         console.error('Train error:', e);
       }
     }, 350);
   }, [k, split, dashLoaded]);
 
-  /* Auto-train on k or split change */
   useEffect(() => { trainModel(); }, [trainModel]);
 
-  /* Soft-refresh dynamic charts when k changes and dashboard is already loaded */
   useEffect(() => {
     if (!dashLoaded || dashData === null) return;
-    if (dashKRef.current === k) return;              // nothing new to fetch
+    if (dashKRef.current === k) return;             
     if (dashSplitRef.current !== null &&
-        Math.round(dashSplitRef.current * 100) !== Math.round(split * 100)) return; // split changed → full reset handles it
-
+        Math.round(dashSplitRef.current * 100) !== Math.round(split * 100)) return; 
     let cancelled = false;
     const refresh = async () => {
       setDashRefreshing(true);
@@ -78,8 +68,8 @@ export function ModelProvider({ children }) {
           residual_hist: dash.residual_hist,
           k:             dash.k,
         }));
-        setBillHistData(dash.bill_hist);   // unchanged but cheap to set
-        setHowLoaded(false);               // residual chart in How-it-works should refresh too
+        setBillHistData(dash.bill_hist);   
+        setHowLoaded(false);               
       } catch (e) {
         console.error('Soft refresh error:', e);
       } finally {
@@ -90,7 +80,6 @@ export function ModelProvider({ children }) {
     return () => { cancelled = true; };
   }, [k, dashLoaded, dashData, split]);
 
-  /* Full dashboard load (only when dashLoaded=false) */
   const loadDashboard = useCallback(async () => {
     if (dashLoaded && dashData) return;
     try {
@@ -108,7 +97,6 @@ export function ModelProvider({ children }) {
     }
   }, [k, split, dashLoaded, dashData]);
 
-  /* Load how-it-works residual data */
   const loadHowItWorks = useCallback(async () => {
     if (howLoaded) return;
     try {

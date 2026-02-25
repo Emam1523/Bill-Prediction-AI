@@ -2,7 +2,6 @@ from django.db import models
 
 
 class HouseholdRecord(models.Model):
-    """One row of the RECS 2009 dataset (24 project columns)."""
 
     typehuq = models.FloatField(verbose_name="Housing Type")
     hdd30yr = models.FloatField(verbose_name="Heating Degree Days (30yr)")
@@ -43,7 +42,6 @@ class HouseholdRecord(models.Model):
     ]
 
     def to_row(self):
-        """Return a 24-float list matching FEATURE_NAMES order."""
         return [getattr(self, f) for f in self.FIELD_ORDER]
 
     def __str__(self):

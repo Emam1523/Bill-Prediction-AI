@@ -1,14 +1,7 @@
-"""
-knn_model.py — kNN Regression for Electricity Bill Prediction (Django version)
---------------------------------------------------------------------------------
-Same from-scratch kNN regressor as the original, but loads data from
-PostgreSQL via Django ORM instead of CSV.
-"""
-
 import random
 import numpy as np
 
-# ── Feature schema (24 columns: 23 inputs + 1 target) ───────────
+#Feature schema
 FEATURE_NAMES = [
     "TYPEHUQ", "HDD30YR", "CDD30YR", "BEDROOMS", "NCOMBATH", "TOTROOMS",
     "CELLAR", "GARGHEAT", "HEATROOM", "ACROOMS", "USECENAC", "TEMPNITEAC",
@@ -16,12 +9,8 @@ FEATURE_NAMES = [
     "DOLELCOL", "DOLELWTH", "DOLELRFG", "DOLELOTH", "DOLLAREL",
 ]
 
-# ── Data loading (from DB rows) ──────────────────────────────────
+#Data loading
 def load_from_db(train_ratio: float = 0.90, seed: int = 42):
-    """Load all HouseholdRecords from PostgreSQL, split into train/test.
-
-    Returns (train, test, stats) identical to the original load_dataset().
-    """
     from predictor.models import HouseholdRecord
 
     random.seed(seed)
@@ -42,10 +31,8 @@ def load_from_db(train_ratio: float = 0.90, seed: int = 42):
 
 
 
-# ── kNN Regressor (NumPy-vectorised) ─────────────────────────────
+#kNN Regressor
 class KNNRegressor:
-    """k-Nearest Neighbours regressor with vectorised distance computation."""
-
     def __init__(self, k: int = 9):
         self.k = k
         self._train_features = np.empty(0)
@@ -83,7 +70,7 @@ class KNNRegressor:
         return preds
 
 
-# ── Metrics ──────────────────────────────────────────────────────
+#Metrics
 def calc_mae(actual, predicted):
     a, p = np.asarray(actual), np.asarray(predicted)
     return float(np.mean(np.abs(a - p)))

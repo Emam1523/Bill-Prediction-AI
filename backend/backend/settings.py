@@ -1,11 +1,8 @@
-"""
-Django settings for ElectriBill AI backend.
-"""
 import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-PROJECT_ROOT = BASE_DIR.parent  # root of the whole repo
+PROJECT_ROOT = BASE_DIR.parent 
 
 SECRET_KEY = "django-insecure-electribill-ai-dev-key-change-in-production"
 DEBUG = True
@@ -26,7 +23,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = "backend.urls"
 WSGI_APPLICATION = "backend.wsgi.application"
 
-# ── PostgreSQL ──────────────────────────────────────────────────────
+#PostgreSQL
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -38,10 +35,10 @@ DATABASES = {
     }
 }
 
-# ── CORS (allow React dev server) ──────────────────────────────────
+#CORS
 CORS_ALLOW_ALL_ORIGINS = True
 
-# ── Static files (React build) ─────────────────────────────────────
+#Static files
 REACT_BUILD_DIR = PROJECT_ROOT / "static" / "react"
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [str(REACT_BUILD_DIR)] if REACT_BUILD_DIR.exists() else []
